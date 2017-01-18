@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>demo</title>
+	<script src="build/vue.js"></script>
+</head>
+<body>
+	<!--声明式渲染-->
+	<div id="app" v-bind:title="huo">
+		{{ message }}
+	</div>
+	<div id="app-2">
+		<span v-bind:title="message">
+			鼠标放上来！
+		</span>
+	</div>
+	<!--条件与循环-->
+	<div id="app-3">
+		<div v-if="seen">
+			Now U see me.
+		</div>
+	</div>
+	<div id="app-4">
+		<ul>
+			<li v-for="(todo,index) of todos">
+				{{todo.text}}-{{index + 1}}
+			</li>
+		</ul>	
+	</div>
+	<!--处理用户输入-->
+	<div id="app-5">
+		<p>{{message}}</p>
+		<button v-on:click="reverseMessage">Reverse Message</button>
+	</div>
+	<!--双向绑定-->
+	<div id="app-6">
+		<p>{{message}}</p>
+		<input type="text" v-model="message">
+	</div>
+	<!--组件构建-->
+	<div id="app-7">
+		<ol>
+			<todo-item v-for="todo in todos" v-bind:todo="todo"></todo-item>
+		</ol>
+	</div>
+	<!--计算属性-->
+	<div id='example'>
+		<p>Original message: {{message}}</p>
+		<p>Computed reversed message: {{reversedMessage}}</p>
+	</div>
+	<!--watch-->
+	<div id="demo">{{ fullName }}</div>
+
+	<div id="watch-example">
+  		<p>
+    		Ask a yes/no question:
+    	<input v-model="question">
+  		</p>
+  		<p>{{ answer }}</p>
+	</div>
+	<!--组件构建-->
+	<div id="app-8">
+ 		 <ol>
+    <!-- Now we provide each todo-item with the todo object    -->
+    <!-- it's representing, so that its content can be dynamic -->
+    		<todo-item v-for="item in groceryList" v-bind:todo="item" class="bar"></todo-item>
+  		</ol>
+	</div>
+	<div id="style" v-bind:style="styleObject">{{message}}</div>
+
+	<!--条件渲染-->
+	<div id="app-9">
+		<div v-if='ok'>
+			<input placeholder="hahaha">
+		</div>
+		<div v-else>
+			<input placeholder="hehehe">
+		</div>
+		<button v-on:click="isOk">click</button>
+	</div>
+	
+	<ul id="repeat-object" class="demo">
+  <li v-for="(value,key) in object">
+    {{key}}:{{ value }}
+  </li>
+</ul>
+
+	<ul id="temp">
+  		<template v-for="item in items">
+    		<li>{{ item.msg }}</li>
+    		<li class="divider"></li>
+  		</template>
+	</ul>
+	<script src="https://unpkg.com/axios@0.12.0/dist/axios.min.js"></script>
+	<script src="https://unpkg.com/lodash@4.13.1/lodash.min.js"></script>
+	<script>
+	var temp = new Vue({
+		el:'#temp',
+		data:{
+			items:[
+				{msg:'aaa'},
+				{msg:'bbb'},
+				{msg:'ccc'}
+			]
+		}
+	})
+	var vm2 = new Vue({
+  el: '#repeat-object',
+  data: {
+    object: {
+      FirstName: 'John',
+      LastName: 'Doe',
+      Age: 30
+    }
+  }
+})
+	var app9 = new Vue({
+		el:'#app-9',
+		data:{
+			ok:true
+		},
+		methods:{
+			isOk:function(){
+				this.ok = this.ok == true ? false :true
+			}
+		}
+	})
+	var styleVm = new Vue({
+		el:'#style',
+		data:{
+			message:'Hello Vue.js!',
+			styleObject:{
+				color:'#201766',
+				fontFamily:'微软雅黑'
+			}
+		}
+	})
+
+	Vue.component('todo-item', {
+  props: ['todo'],
+  template: '<li class="foo">{{ todo.text }}</li>'
+})
+var app8 = new Vue({
+  el: '#app-8',
+  data: {
+    groceryList: [
+      { text: 'Vegetables' },
+      { text: 'Cheese' },
+      { text: 'Whatever else humans are supposed to eat' }
+    ]
+  }
+})
+
+	var watchExampleVM = new Vue({
+  el: '#watch-example',
+  data: {
+    question: '',
+    answer: 'I cannot give you an answer until you ask a question!'
+  },
+  watch: {
+    // 如果 question 发生改变，这个函数就会运行
+    question: function (newQuestion) {
+      this.answer = 'Waiting for you to stop typing...'
+      this.getAnswer()
+    }
+  },
+  methods: {
+    // _.debounce 是一个通过 lodash 限制操作频率的函数。
+    // 在这个例子中，我们希望限制访问yesno.wtf/api的频率
+    // ajax请求直到用户输入完毕才会发出
+    // 学习更多关于 _.debounce function (and its cousin
+    // _.throttle), 参考: https://lodash.com/docs#debounce
+    getAnswer: _.debounce(
+      function () {
+        var vm = this
+        if (this.question.indexOf('?') === -1) {
+          vm.answer = 'Questions usually contain a question mark. ;-)'
+          return
+        }
+        vm.answer = 'Thinking...'
+        axios.get('https://yesno.wtf/api')
+          .then(function (response) {
+            vm.answer = _.capitalize(response.data.answer)
+          })
+          .catch(function (error) {
+            vm.answer = 'Error! Could not reach the API. ' + error
+          })
+      },
+      // 这是我们为用户停止输入等待的毫秒数
+      500
+    )
+  }
+})
+
+		var vm2 = new Vue( {
+			el:'#demo', 
+			data: {
+				firstName: 'Foo', 
+				lastName:'Bar'
+			}, 
+			computed: {
+				fullName: {
+					get:function() {
+						return this.firstName + ' ' + this.lastName
+					}, 
+					set:function(newValue) {
+						var names = newValue.split(' ')
+						this.firstName = names[0]
+						this.lastName = names[names.length - 1]
+					}
+				}
+			}
+		}
+		)
+	    var vm = new Vue({
+	    	el:'#example',
+	    	data:{
+	    		message:'Hello'
+	    	},
+	    	computed:{
+	    		reversedMessage:function(){
+	    			return this.message.split('').reverse().join('')
+	    		}
+	    	}
+	    })
+		var app = new Vue( {
+			el:"#app", 
+			data: {
+				huo: 'huo', 
+				message:'Hello Vue.js!'
+			}
+		}
+		)
+		var app2 = new Vue({
+		
+			el: "#app-2",
+			data:{
+				message:'Time is ' + new Date()
+			}
+		})
+		var app3 = new Vue({
+		
+			el: "#app-3",
+			data:{
+				seen:true
+			}
+		})
+		var app4 = new Vue({
+		
+			el: "#app-4",
+			data:{
+				todos:[
+						{text:'iphone5'},
+						{text:'iphone6'},
+						{text:'iphone7'}
+				]
+			}
+		})
+		var app5 = new Vue({
+		
+			el: "#app-5",
+			data:{
+				message:'Hello Vue.js!'
+			},
+			methods:{
+				reverseMessage:function(){
+					this.message = this.message.split('').reverse().join('')
+				}
+			}		
+		})
+		var app6 = new Vue({
+		
+			el: "#app-6",
+			data:{
+				message:'Hello Vue.js!'
+			}
+		})
+		Vue.component('todo-item',{
+			props:['todo'],
+			template:'<li>{{todo.text}}</li>'
+		})
+		var app7 = new Vue({
+		
+			el: "#app-7",
+			data:{
+				todos:[
+						{text:'iphone5'},
+						{text:'iphone6'},
+						{text:'iphone7'}
+				]
+			}
+		})
+	</script>
+</body>
+</html>
